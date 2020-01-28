@@ -1,0 +1,16 @@
+{
+    "name": "hotel-app-console",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ClementLttd/hotel-app-console.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

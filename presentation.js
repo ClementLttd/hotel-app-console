@@ -1,20 +1,72 @@
-function start() {
-    console.log('1. Lister les clients'),
-        console.log('99. Sortir')
+var service = require('./service.js');
 
-    var readline = require('readline');
-    var rl = readline.createInterface({
-        input: process.stdin,
-        outpt: process.stdout
-    })
-    rl.question('saisissez un numéro : ', function(saisie) {
-        if (saisie == 1) {
-            console.log('>> Liste des clients');
-            start();
-        } else if (saisie == 99) {
-            console.log('Au revoir');
-            rl.close();
+var readline = require('readline');
+var rl = readline.createInterface({
+    input: process.stdin,
+    outpt: process.stdout
+});
+var rl2 = readline.createInterface({
+    input: process.stdin,
+    outpt: process.stdout
+});
+var rl3 = readline.createInterface({
+    input: process.stdin,
+    outpt: process.stdout
+});
+
+function startMenu() {
+    var menu = `
+        1. Liste des clients
+        2. Ajouter un client
+        3. Rechercher un client par nom
+        4. Vérifier la disponibilité d'une chambre
+        99. Quitter
+        `;
+    console.log(menu);
+    rl.question(menu, function(saisie) {
+
+        console.log(`Vous avez saisi : ${saisie}`);
+        startMenu();
+        switch (saisie) {
+            case '1':
+                console.log('>> Liste des clients');
+                service.listerClients(function(data) {
+                    data.forEach(element => {
+                        console.log(element.nom, " ", element.prenoms)
+                    });
+                    startMenu();
+                });
+                break;
+            case '2':
+                rl.question("Saisissez un nom : ", function(saisie1) {
+                    rl.question("Saisissez un prenom : ", function(saisie2) {
+
+                        service.ajouterClient(saisie1, saisie2, function(ajouter) {
+                            console.log(ajouter);
+                            startMenu();
+                        });
+                    });
+
+
+                })
+                break;
+            case '3':
+                rl.question("Saisissez un nom : ", function(nom) {
+                    service.chercherNom(nom, function(data) {
+
+                        data.forEach(function(client) {
+                            console.log(client.nom + " " + client.prenoms);
+                        });
+                        startMenu();
+                    });
+
+                });
+                break;
+            default:
+                console.log('Au revoir');
+
+                rl.close();
         }
-    })
+    });
 }
-exports.start = start;
+exports.startMenu = startMenu;

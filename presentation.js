@@ -1,72 +1,67 @@
-var service = require('./service.js');
+var serv = require('./service.js');
 
 var readline = require('readline');
 var rl = readline.createInterface({
     input: process.stdin,
-    outpt: process.stdout
+    output: process.stdout
 });
-var rl2 = readline.createInterface({
-    input: process.stdin,
-    outpt: process.stdout
-});
-var rl3 = readline.createInterface({
-    input: process.stdin,
-    outpt: process.stdout
-});
+const service = new serv.Service;
 
-function startMenu() {
-    var menu = `
-        1. Liste des clients
-        2. Ajouter un client
-        3. Rechercher un client par nom
-        4. Vérifier la disponibilité d'une chambre
-        99. Quitter
-        `;
-    console.log(menu);
-    rl.question(menu, function(saisie) {
-
-        console.log(`Vous avez saisi : ${saisie}`);
-        startMenu();
-        switch (saisie) {
-            case '1':
-                console.log('>> Liste des clients');
-                service.listerClients(function(data) {
-                    data.forEach(element => {
-                        console.log(element.nom, " ", element.prenoms)
-                    });
-                    startMenu();
-                });
-                break;
-            case '2':
-                rl.question("Saisissez un nom : ", function(saisie1) {
-                    rl.question("Saisissez un prenom : ", function(saisie2) {
-
-                        service.ajouterClient(saisie1, saisie2, function(ajouter) {
-                            console.log(ajouter);
-                            startMenu();
-                        });
-                    });
-
-
-                })
-                break;
-            case '3':
-                rl.question("Saisissez un nom : ", function(nom) {
-                    service.chercherNom(nom, function(data) {
-
-                        data.forEach(function(client) {
-                            console.log(client.nom + " " + client.prenoms);
-                        });
+const listerClients = () => {
+    service.listerClients()
+        .then(clients => {
+            console.log('>> Liste des clients');
+            clients.forEach(element => console.log(element.nom, element.prenoms));
+            startMenu();
+        })
+        .catch(err => console.log("Erreur =>", err));
+}
+const ajouterClient = () => {
+    console.log('>> Ajouter un client');
+    rl.question("Saisissez un nom : ", saisie1 => {
+        rl.question("Saisissez un prenom : ", saisie2 => {
+                service.ajouterClient(saisie1, saisie2)
+                    .then(() => {
+                        console.log('le client a bien été ajouté en base');
                         startMenu();
                     });
 
-                });
-                break;
-            default:
-                console.log('Au revoir');
 
-                rl.close();
-        }
+            })
+            .catch(err => console.log("Erreur =>", err));
+    });
+
+}
+const rechercherParNom = () => {
+    rl.question("Saisissez un nom : ", nom => {
+        service.rechercherParNom(nom)
+            .then((clients) => {
+                console.log(`>>liste des clients dont le nom est ${nom}`);
+                clients.forEach(element => console.log(element.nom, element.prenoms));
+                startMenu();
+            })
+            .catch(err => err);
     });
 }
+const quitter = () => {
+    console.log('Au revoir');
+    rl.close();
+}
+var options = {
+    '1': { libelle: 'Liste des clients', execFn: listerClients },
+    '2': { libelle: 'Ajouter un client', execFn: ajouterClient },
+    '3': { libelle: 'Chercher par nom', execFn: chercherNom },
+    '99': { libelle: 'Quitter', execFn: quitter }
+};
+const startMenu = () => {
+    let menu = 'Veuillez faire un choix : \n'
+    for (const prop in options) {
+        menu += prop + '. ' + options[prop].libelle + '\n';
+    }
+    rl.question(menu, (choix) => {
+        options[choix].execFn();
+    });
+
+}
+
 exports.startMenu = startMenu;

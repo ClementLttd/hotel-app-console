@@ -1,39 +1,26 @@
-var presentation = require('./presentation.js');
-var request = require('request');
+const presentation = require('./presentation.js');
+const request = require('request');
+const requestPromise = require('request-promise-native');
 
-function listerClients(callBack) {
-    request('https://hotel-web-api.herokuapp.com/clients?nom', { json: true }, function(err, res, data) {
+class Service {
+    listerClients = () => {
+        return requestPromise('https://hotel-web-api.herokuapp.com/clients?nom', { json: true })
+            .then(clients => clients);
+    }
 
-        callBack(data);
-    });
-}
-
-function ajouterClient(nom, prenom) {
-
-    request.post('https://hotel-web-api.herokuapp.com/clients?nom', {
+    ajouterClient = (nom, prenom) => {
+        return requestPromise.post('https://hotel-web-api.herokuapp.com/clients?nom', {
             json: {
                 "nom": nom,
                 "prenoms": prenom
             }
-        },
-        (error, res, body) => {
-            if (error) {
-                console.error(error)
-                return
-            }
-            console.log(`statusCode: ${res.statusCode}`)
-            console.log(body)
-        });
+        })
 
+    }
+    rechercherParNom = nom => {
+        return requestPromise(`https://hotel-web-api.herokuapp.com/clients?nom${nom}`, { json: true })
+            .then(clients => clients);
+    }
 }
 
-function chercherNom(nom, callBack) {
-    request('https://hotel-web-api.herokuapp.com/clients?nom' + nom, { json: true }, function(err, res, data) {
-
-        callBack(data);
-    });
-}
-
-exports.ajouterClient = ajouterClient;
-exports.listerClients = listerClients;
-exports.chercherNom = chercherNom;
+exports.Service = Service;
